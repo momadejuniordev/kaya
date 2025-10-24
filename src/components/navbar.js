@@ -10,7 +10,7 @@ export default function Navbar() {
          <img
             src="./logo.png"
             alt="App Preview"
-            className='w-18'
+            className='w-32'
           />
       </Link>
       <nav className="space-x-6">
