@@ -20,7 +20,7 @@ export default function Home() {
           <a
             href="https://github.com/momadejunior/vuyakaya.realease/releases/download/v1.0.0/vuyakaya.apk"
             download
-            className="inline-block bg-white text-[#DA1C5C] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition transform hover:scale-105"
+            className="inline-block bg-white text-[#DA1C5C] px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition transform hover:scale-105 mr-2"
           >
             Baixar para Android
           </a>

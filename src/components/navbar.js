@@ -5,11 +5,11 @@ import Image from 'react'
 
 export default function Navbar() {
   return (
-    <header className="flex justify-between items-center px-10 py-6 sticky top-0 bg-white bg-opacity-90 shadow-md z-10">
+    <header className="flex justify-between items-center px-10 py-6 sticky top-0 bg-white bg-opacity-90 shadow-md z-10" id="navbar">
       <Link to="/">
          <img
             src="./logo.png"
-            alt="App Preview"
+            alt="VuyaKaya"
             className='w-32'
           />
       </Link>

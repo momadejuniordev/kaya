@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
 import { IoShareOutline, IoSearch, IoCloseCircle } from "react-icons/io5";
+import BottomNav from "../components/BottomNav";
 
 export default function Feed() {
   const [people, setPeople] = useState([]);
@@ -145,7 +146,7 @@ Status: ${person.status || "Ativo"}`,
           </div>
         )}
 
-       <a href={`${person.id}/detalhes`}>
+       <a href={`/feed/${person.id}/detalhes`}>
          <img
           src={person.photo_url || "/images/render.jpg"}
           alt={person.nome}
@@ -185,6 +186,8 @@ Status: ${person.status || "Ativo"}`,
     );
 
   return (
+
+    <>
     <div style={{ paddingBottom: 20 }}>
       {/* Pesquisa */}
       <div style={{ padding: 16 }}>
@@ -255,5 +258,9 @@ Status: ${person.status || "Ativo"}`,
         <p style={{ textAlign: "center", color: "#888", marginTop: 20 }}>Nenhuma publicação aprovada encontrada.</p>
       )}
     </div>
+
+    <BottomNav/>
+
+    </>
   );
 }

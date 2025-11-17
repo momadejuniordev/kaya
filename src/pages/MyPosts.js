@@ -1,7 +1,9 @@
+// components/MyPosts.jsx
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
-import CommentsSection from "../components/CommentsSection";
+import { IoHeartOutline, IoHeart, IoChatbubbleOutline } from "react-icons/io5";
 import SharePersonButton from "../components/ShareButton";
+import CommentsSection from "../components/CommentsSection";
 
 
 export default function MyPosts() {
@@ -10,6 +12,7 @@ export default function MyPosts() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Modal
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [encerrarMotivo, setEncerrarMotivo] = useState("");
@@ -43,7 +46,6 @@ export default function MyPosts() {
       return;
     }
 
-    // Contagem de likes, comentários, shares
     const postsWithCounts = await Promise.all(
       (posts ?? []).map(async (post) => {
         const { count: likesCount } = await supabase
@@ -86,6 +88,7 @@ export default function MyPosts() {
     if (userId) fetchMyPosts();
   }, [userId]);
 
+  // Like / Deslike
   const handleLike = async (post) => {
     if (!userId) return;
 
@@ -117,6 +120,7 @@ export default function MyPosts() {
     );
   };
 
+  // Abrir modal
   const openEncerrarModal = (postId) => {
     setSelectedPostId(postId);
     setEncerrarMotivo("");
@@ -124,6 +128,7 @@ export default function MyPosts() {
     setModalVisible(true);
   };
 
+  // Confirmar encerramento
   const handleConfirmEncerrar = async () => {
     if (!selectedPostId || !encerrarMotivo) return;
 
@@ -144,52 +149,130 @@ export default function MyPosts() {
       );
 
       setModalVisible(false);
-      window.alert("Publicação encerrada com sucesso!");
+      alert("Publicação encerrada com sucesso!");
     } catch (err) {
       console.error("Erro ao encerrar publicação:", err);
-      window.alert("Não foi possível encerrar a publicação.");
+      alert("Não foi possível encerrar a publicação.");
     }
   };
 
-  if (loading) return <p>Carregando publicações...</p>;
+  if (loading) return <div>Carregando publicações...</div>;
 
   return (
-    <div style={{ padding: 16 }}>
+    <div className="p-4 mt-4">
+      
       {myPosts.map((post) => (
-        <div key={post.id} style={{ border: "1px solid #ccc", borderRadius: 12, marginBottom: 16, padding: 16 }}>
+        <div
+          key={post.id}
+          style={{
+            background: "#fff",
+            borderRadius: 12,
+            padding: 16,
+            marginBottom: 16,
+            boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            position: "relative",
+          }}
+
+          className="m-auto md:w-1/2 sm:1/1"
+        >
           {post.photo_url && (
-            <img src={post.photo_url} alt={post.nome} style={{ width: "100%", borderRadius: 12 }} />
+            <img
+              src={post.photo_url}
+              alt={post.nome}
+              style={{ width: "100%", borderRadius: 12, marginBottom: 12 }}
+            />
           )}
 
-          {post.status && <span style={{ backgroundColor: "#d91c5c", color: "#fff", padding: "2px 6px", borderRadius: 6 }}>{post.status}</span>}
-
-          <h3>{post.nome}</h3>
-          <p>{post.category}</p>
-          <p>Última localização: {post.ultima_localizacao}</p>
-          <p>{post.descricao_detalhada}</p>
-          <p>{new Date(post.created_at).toLocaleString()}</p>
-
-          <div style={{ display: "flex", gap: 12 }}>
-            <button onClick={() => handleLike(post)}>
-              {post.liked_by_user ? "❤️" : "🤍"} {post.likes_count ?? 0} Likes
-            </button>
-            <button>
-              💬 {post.comments_count ?? 0} Comentários
-            </button>
-            <SharePersonButton person={post} onShared={() => {
-              setMyPosts((prev) => prev.map((p) => p.id === post.id ? { ...p, shares_count: (p.shares_count ?? 0) + 1 } : p));
-            }} />
-            <span>{post.shares_count ?? 0} Partilhas</span>
-          </div>
-
           {post.status && (
-            <div>
-              <p>Status: {post.status}</p>
-              <p>Motivo: {post.encerrado_motivo}</p>
+            <div
+              style={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                background: "#d91c5c",
+                padding: "4px 8px",
+                borderRadius: 6,
+                color: "#fff",
+                fontWeight: "bold",
+                fontSize: 12,
+              }}
+            >
+              {post.status}
             </div>
           )}
 
-          <button onClick={() => !post.status && openEncerrarModal(post.id)} disabled={!!post.status}>
+          <h2 style={{ margin: 0 }}>{post.nome}</h2>
+          <p style={{ color: "#d91c5c", fontWeight: "bold" }}>{post.category}</p>
+          <p>Última localização: {post.ultima_localizacao}</p>
+          <p>{post.descricao_detalhada}</p>
+          <p style={{ color: "#999", fontSize: 12 }}>
+            {new Date(post.created_at).toLocaleString()}
+          </p>
+
+          {/* Ações */}
+          <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
+            <button
+              style={{ display: "flex", alignItems: "center", gap: 4 }}
+              onClick={() => handleLike(post)}
+            >
+              {post.liked_by_user ? <IoHeart color="#d91c5c" /> : <IoHeartOutline />}
+              {post.likes_count ?? 0} Likes
+            </button>
+
+            <button style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <IoChatbubbleOutline />
+              {post.comments_count ?? 0} Comentários
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <SharePersonButton
+                person={post}
+                onShared={() =>
+                  setMyPosts((prev) =>
+                    prev.map((p) =>
+                      p.id === post.id
+                        ? { ...p, shares_count: (p.shares_count ?? 0) + 1 }
+                        : p
+                    )
+                  )
+                }
+              />
+              {post.shares_count ?? 0} Partilhas
+            </div>
+          </div>
+
+          {post.status && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 8,
+                background: "#f3f4f6",
+                borderRadius: 8,
+              }}
+            >
+              <p>
+                <strong>Status:</strong> {post.status}
+              </p>
+              <p>
+                <strong>Motivo:</strong> {post.encerrado_motivo}
+              </p>
+            </div>
+          )}
+
+          <button
+            style={{
+              marginTop: 12,
+              borderRadius: 8,
+              padding: "10px 0",
+              width: "100%",
+              background: post.status ? "#ccc" : "#d91c5c",
+              color: post.status ? "#666" : "#fff",
+              fontWeight: "bold",
+              cursor: post.status ? "not-allowed" : "pointer",
+            }}
+            onClick={() => !post.status && openEncerrarModal(post.id)}
+            disabled={!!post.status}
+          >
             {post.status ? "Publicação encerrada" : "Encerrar publicação"}
           </button>
 
@@ -197,26 +280,80 @@ export default function MyPosts() {
         </div>
       ))}
 
+      {/* Modal */}
       {modalVisible && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.4)", display: "flex", justifyContent: "center", alignItems: "center"
-        }}>
-          <div style={{ backgroundColor: "#fff", padding: 20, borderRadius: 12, width: "90%" }}>
-            <h3>Encerrar publicação</h3>
-            <label>Motivo do encerramento:</label>
-            <input value={encerrarMotivo} onChange={(e) => setEncerrarMotivo(e.target.value)} placeholder="Digite o motivo" />
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: 20,
+              borderRadius: 12,
+              width: "90%",
+              maxWidth: 400,
+            }}
+          >
+            <h2>Encerrar publicação</h2>
 
-            <label>Status da pessoa:</label>
-            <select value={encerrarStatus} onChange={(e) => setEncerrarStatus(e.target.value)}>
+            <label style={{ fontWeight: 600, display: "block", marginTop: 8 }}>
+              Motivo do encerramento:
+            </label>
+            <input
+              style={{
+                width: "100%",
+                padding: 8,
+                marginTop: 4,
+                marginBottom: 8,
+                borderRadius: 8,
+                border: "1px solid #ccc",
+              }}
+              placeholder="Digite o motivo"
+              value={encerrarMotivo}
+              onChange={(e) => setEncerrarMotivo(e.target.value)}
+            />
+
+            <label style={{ fontWeight: 600, display: "block", marginTop: 8 }}>
+              Status da pessoa:
+            </label>
+            <select
+              style={{
+                width: "100%",
+                padding: 8,
+                marginTop: 4,
+                marginBottom: 8,
+                borderRadius: 8,
+                border: "1px solid #ccc",
+              }}
+              value={encerrarStatus}
+              onChange={(e) => setEncerrarStatus(e.target.value)}
+            >
               <option value="Encontrada">Encontrada</option>
               <option value="Caso encerrado">Caso encerrado</option>
               <option value="Outros">Outros</option>
             </select>
 
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
-              <button onClick={() => setModalVisible(false)}>Cancelar</button>
-              <button onClick={handleConfirmEncerrar} style={{ backgroundColor: "#d91c5c", color: "#fff" }}>Encerrar</button>
+              <button
+                style={{ padding: "10px 20px", borderRadius: 8, background: "#ccc" }}
+                onClick={() => setModalVisible(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                style={{ padding: "10px 20px", borderRadius: 8, background: "#d91c5c", color: "#fff" }}
+                onClick={handleConfirmEncerrar}
+              >
+                Encerrar
+              </button>
             </div>
           </div>
         </div>
